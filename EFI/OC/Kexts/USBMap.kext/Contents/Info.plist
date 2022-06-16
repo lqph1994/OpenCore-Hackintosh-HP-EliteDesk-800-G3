@@ -75,7 +75,7 @@
 						<key>Comment</key>
 						<string>FRONT_R</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						AwAAAA==
@@ -86,7 +86,7 @@
 						<key>Comment</key>
 						<string>BACK_R2</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						BAAAAA==
@@ -97,7 +97,7 @@
 						<key>Comment</key>
 						<string>BACK_R1</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						BQAAAA==
@@ -128,7 +128,7 @@
 						<key>Comment</key>
 						<string>FRONT_L</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						DQAAAA==
@@ -161,7 +161,7 @@
 						<key>Comment</key>
 						<string>FRONT_R</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						EwAAAA==
@@ -172,7 +172,7 @@
 						<key>Comment</key>
 						<string>BACK_R2</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						FAAAAA==
@@ -183,7 +183,7 @@
 						<key>Comment</key>
 						<string>BACK_R1</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						FQAAAA==
@@ -203,7 +203,7 @@
 						<key>Comment</key>
 						<string>FRONT_L</string>
 						<key>UsbConnector</key>
-						<integer>0</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						FwAAAA==
