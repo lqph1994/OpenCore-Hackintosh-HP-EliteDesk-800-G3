@@ -50,7 +50,6 @@ Figure 2. Back face of model
 
 </div>
 
-
 ## WORKING & NOT WORKING 
 
 ### Working ✅
@@ -80,17 +79,21 @@ Figure 2. Back face of model
 - Unlocking from Apple Watch
 
 ##  BIOS SETUP 💾
+
 >**Required**: Please reset your BIOS to default settings before this
 
 - **Advanced &rarr; Boot Options**
+
     - Disable **Fast Boot**
     - Enable **USB Storage Boot**
     - UEFI Boot order, place your bootable macOS installation USB on the first row otherwise you will need to choose it when system restarts by pressing **F10** &rarr; your USB.
 
 - **Advanced &rarr; Secure Boot Configuration**
+
     - Select **Legacy Support Disable and Secure Boot Disable**
 
 - **Advanced &rarr; System Options**
+
     - Enable **Virtualization Technology (VTx)**
     - Disable **Virtualization Technology for Directed I/O (VTd)**
     - Enable **M.2 SSD** if you're using a NVME SSD
@@ -98,6 +101,7 @@ Figure 2. Back face of model
     - Check **Allow PCIe/PCI SERR# Interrupt** (Uncheck it if have interruption issues)
 
 - **Advanced &rarr; Built-in Device Options**
+
     - Disable **Wake on LAN**
     - Set Video memory size to **64MB** or larger
     - Disable **LAN/WLAN Auto Switching**
@@ -118,10 +122,12 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 ## DRIVERS 🗳
 
 **Required**
+
 - HfsPlus.efi
 - OpenRuntime.efi
 
 **Optional**
+
 - OpenCanopy.efi (for enabling OpenCore GUI bootloader)
 - AudioDxe.efi (for enabling boot chime)
 
@@ -130,6 +136,7 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 ## KEXTS 💉
 
 **Required**
+
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen)
 - [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC)
@@ -142,6 +149,7 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 >Notice: `itlwm.kext` and `IntelBluetoothFirmware.kext` must be on the same version.
 
 **Optional**
+
 - SMCProcessor.kext (for monitoring CPU temperature, included in `VirtualSMC` package)
 - SMCSuperIO.kext (for monitoring fan speed, included in `VirtualSMC` package)
 - [CPUFriend.kext](https://github.com/stevezhengshiqi/one-key-cpufriend) (CPU power management, please ignore if you are not certain about this one) 
@@ -171,10 +179,12 @@ You will be plugging your USB 2.0 device into each port of your PC, each time yo
 You will be asked for renaming the port when a new USB device is recognized by the program, press `N` and name a port for whatever name you want. For easy mapping, I would suggest to name the port based on its position (you can refer to Figure 1 and Figure 2 for port positions)
 
 ### Step 2: Discover USB 3.0 ports
+
 Replicate `Step 1`, but in this step you will be using a USB 3.0 device.    
 Again, put a name that refers to the port positions, you can enter the same name as in `Step 1`, just make sure the position name is correct.
 
 ### Step 3: Discover USB C device
+
 Replicate `Step 1`, and this step will require you to plug in USB C device.     
 Place USB C based on the position again. As I have only one USB C port, so I will name all the USB C ports found by `TYPE_C`.
 >Notice: A USB C device in my case will requrie three ports (one will be recogized as USB 2.0 device and two will be USB 3.0 device, they are port 6, 14, 15 as from Figure 3)
@@ -187,6 +197,7 @@ Figure 3. USB ports after mapping
 </div>
 
 ### Step 4: Define USB ports
+
 After completing all the steps above, you will be required to define the type of all discovered ports.      
 From the current screen in Figure 3, press `Q` and then `P` &rarr; `Enter` to the build kext step.    
 You can also enable a port in the list by entering: `port:On`, replace the `port` with the port number shown in the screen which you found it's being disabled from the screen as in Figure 4.     
@@ -201,6 +212,7 @@ Figure 4. USB ports after fully defined
 </div>
 
 ### Step 5: Build & apply
+
 At this step, after fully defined all the ports, press `K` and `Enter` to build `USBMap.kext` (for Catalina and newer OS) or `USBMapLegacy.kext` (for Mojave and older OS).
 Copy `USBMap.kext` or `USBMapLegacy.kext` into `EFI/OC/Kexts/`, edit `config.plist` by adding new entry that point to this kext.    
 
@@ -211,23 +223,31 @@ Reboot, and all my ports work. ✅
 ### Boot arguments
 
 **Required (only remove when you are good with your set up)**
-- `v`: boot macOS in verbose mode (you won't need this after )
+
+- `-v`: boot macOS in verbose mode
 - `debug=0x100`: prevents macOS not to reboot when facing a kernel panic, this will help giving you some insights why the system is not booting.
-- `keepsyms=1`: 
+- `keepsyms=1`: prints the symbols during a kernel panic.
 
-You will notice that the `boot-args` from my `config.plist` file has the argument `alcid=20`. It will be needed for playing boot chime with internal audio.
+**Extras**  
 
-The number `20` is layout ID for my Conexant audio device, which you can find all the supported coded in this [page](https://github.com/acidanthera/AppleALC/wiki/Supported-codecs).
+You will notice that the `boot-args` from my `config.plist` file has the argument `alcid=20`. It will be needed for playing boot chime with internal audio. The number `20` is layout ID for my Conexant audio device, which you can find all the supported coded in this [page](https://github.com/acidanthera/AppleALC/wiki/Supported-codecs).
 
 Also, there is an extra argument `igfxonln=1` that I aimed to force all displays online for fixing wake issue (but not helped at all). You may want to delete this argument.
+
+>So literally you will need this in your `boot-args`: `-v debug=0x100 keepsyms=1 alcid=xx`, with `xx` is your audio layout ID.
 
 
 ### Graphics acceleration
 
+Follow the guide over [here](https://github.com/dortania/vanilla-laptop-guide-legacy/tree/master/OpenCore/config-laptop.plist) by choosing your correct CPU model name.     
+From my system on Kaby Lake and Intel Graphics HD 630, I will need to set
+- AAPL,ig-platform-id   |   DATA    |   <00001B59>
+- device-id | DATA  | <1B590000>        
 
-### GUI bootloader
+under `PciRoot(0x0)/Pci(0x2,0x0)` from `DeviceProperties` section of `config.plist` file.
 
-### Boot chime
+### GUI bootloader and Boot chime
+Follow the guide from OpenCore [here](https://dortania.github.io/OpenCore-Post-Install/cosmetic/gui.html#setting-up-boot-chime-with-audiodxe)
 
 ## CONTRIBUTION 🤝
 
