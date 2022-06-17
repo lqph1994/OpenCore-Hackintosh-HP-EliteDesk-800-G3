@@ -1,9 +1,9 @@
 # OpenCore Hackintosh on HP EliteDesk 800 G3 
 <img align="right" height="200" width="280"  src="Assets/neofetch.png">
 
-This is **NOT** a guide to install macOS on Custom PC. Indeed, it is a repository where I store files that were configured to run macOS properly on HP EliteDesk 800 G3.
+This is a repository where I store files that were configured to run macOS properly on HP EliteDesk 800 G3.
 
-You can use the EFI folder or refer to the configurations here to make your own bootable macOS installation USB. More information on creating bootable macOS installation USB please checkout the [official guide](https://dortania.github.io/OpenCore-Install-Guide/installer-guide/) from OpenCore.
+You can use the EFI folder or refer to the configurations here to make your own bootable macOS installation USB. More information on creating bootable macOS installation USB please checkout the [official guide](https://dortania.github.io/OpenCore-Install-Guide/installer-guide/) from OpenCore. If you are on the same HP model or system, you can copy or modify my EFI folder and place it into EFI partition of your USB.
 
 Explainations for files and configurations are presented in way that user can understand and apply for his/her own PC with the same system or model.
 
@@ -68,7 +68,7 @@ Figure 2. Back face of model
 
 - Sleep (blackscreen after sleeping, can not wake) &rarr; finding way to fix.
 - AirDrop (AirDrop appears but can not send/receive files) &rarr; can be fixed by a legacy Mac wireless card (e.g BCM94360 for example)
-- Apple TV (can open but video is not streamed) &rarr; finding way to fix.
+- Apple TV (can open but video is not streamed) &rarr; finding way to fix. (Update: AppleTV uses DRM, the DRM fix from WhateverGreen has been broken since macOS 10.12.3, you will need a dGPU to address this issue)
 
 ### Unchecked / tested ❓
 
@@ -87,10 +87,12 @@ Figure 2. Back face of model
     - Disable **Fast Boot**
     - Enable **USB Storage Boot**
     - UEFI Boot order, place your bootable macOS installation USB on the first row otherwise you will need to choose it when system restarts by pressing **F10** &rarr; your USB.
+    - Other settings remain default
 
 - **Advanced &rarr; Secure Boot Configuration**
 
     - Select **Legacy Support Disable and Secure Boot Disable**
+    - Other settings remain default
 
 - **Advanced &rarr; System Options**
 
@@ -99,13 +101,15 @@ Figure 2. Back face of model
     - Enable **M.2 SSD** if you're using a NVME SSD
     - Check **M.2 WLAN/BT** (Uncheck it if have interruption issues)
     - Check **Allow PCIe/PCI SERR# Interrupt** (Uncheck it if have interruption issues)
+    - Other settings remain default
 
 - **Advanced &rarr; Built-in Device Options**
 
     - Disable **Wake on LAN**
-    - Set Video memory size to **64MB** or larger
+    - Set **Video memory size** to **64MB** or larger
     - Disable **LAN/WLAN Auto Switching**
     - Disable **Wake on Wake on USB**
+    - Other settings remain default
 
 >**Notice**: Make sure to save your settings before restarting
 
@@ -213,7 +217,7 @@ Figure 4. USB ports after fully defined
 
 ### Step 5: Build & apply
 
-At this step, after fully defined all the ports, press `K` and `Enter` to build `USBMap.kext` (for Catalina and newer OS) or `USBMapLegacy.kext` (for Mojave and older OS).
+At this step, after fully defining all the ports, press `K` and `Enter` to build `USBMap.kext` (for Catalina and newer OS) or `USBMapLegacy.kext` (for Mojave and older OS).
 Copy `USBMap.kext` or `USBMapLegacy.kext` into `EFI/OC/Kexts/`, edit `config.plist` by adding new entry that point to this kext.    
 
 Reboot, and all my ports work. ✅
@@ -241,13 +245,46 @@ Also, there is an extra argument `igfxonln=1` that I aimed to force all displays
 
 Follow the guide over [here](https://github.com/dortania/vanilla-laptop-guide-legacy/tree/master/OpenCore/config-laptop.plist) by choosing your correct CPU model name.     
 From my system on Kaby Lake and Intel Graphics HD 630, I will need to set
-- AAPL,ig-platform-id   |   DATA    |   <00001B59>
-- device-id | DATA  | <1B590000>        
+- AAPL,ig-platform-id   |   DATA    |   <00001659>      
 
 under `PciRoot(0x0)/Pci(0x2,0x0)` from `DeviceProperties` section of `config.plist` file.
 
+>Notice: If you are on HD 630, it's safe to choose <00001659> as <00001B59> caused an issue for one of my DisplayPorts (not receive signal after booting).
+
 ### GUI bootloader and Boot chime
 Follow the guide from OpenCore [here](https://dortania.github.io/OpenCore-Post-Install/cosmetic/gui.html#setting-up-boot-chime-with-audiodxe)
+
+**GUI bootloader**  
+I already included the EFI folder that contains Resources for a GUI bootloader, and also configured the `config.plist`.     
+If you want to modify the theme, feel free to change it from the property `Misc -> Boot -> PickerVariant` of `config.plist` file. Options can be found [here](https://dortania.github.io/OpenCore-Post-Install/cosmetic/gui.html#setting-up-opencore-s-gui).
+
+**Boot chime**
+>Important: if you are not using my EFI folder, make sure you have `AudioDxe.efi` in your `EFI/OC/Drivers/` and it must be on the same OpenCore version with `HfsPlus.efi` and `OpenRuntime.efi`.
+
+You need to define two things below in order to get boot chime:
+- `AudioCodec`: go to Terminal and run:
+```
+ioreg -rxn IOHDACodecDevice | grep IOHDACodecAddress
+```
+Then you will probably see this:
+```
+  |   "IOHDACodecAddress" = 0x0
+  |   "IOHDACodecAddress" = 0x2
+```
+There will be few lines appear on Terminal, mostly will be two. First is the internal audio (in my case that is the Conexant one), and the second one will be HDMI/DVI sound. In this case I will pick `0x0` for the `AudioCodec` as I want to play boot chime from the internal audio.     
+You can change it to another value appears, if it won't work, just switch to another one.
+
+- `AudioDevice`: run [gfxutil](https://github.com/acidanthera/gfxutil/releases) to find the path
+```
+/path/to/gfxutil -f HDEF
+```
+You will receive something like this:
+```
+00:1f.3 8086:a2f0 /PCI0@0/HDEF@1F,3 = PciRoot(0x0)/Pci(0x1F,0x3)
+```
+Grab the right part after the `=`, in my case it would be `PciRoot(0x0)/Pci(0x1F,0x3)`.
+
+>After get the `AudioCodec` and `AudioDevice`, put them under `UEFI -> Audio`. Other configurations I have already made, you can change the others if you know.
 
 ## CONTRIBUTION 🤝
 
