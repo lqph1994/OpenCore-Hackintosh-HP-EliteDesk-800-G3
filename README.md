@@ -41,12 +41,12 @@ Figure 2. Back face of model
 | Memory | 16GB (8GB x 2) - Hynix/Hyundai DDR4 2400 MHz |
 | Graphics | Intel HD Graphics 630 |
 | Monitor | LG 29WN600 |
-| Wi-Fi | Intel® Dual Band Wireless-AC 8265 |
+| Wi-Fi | Broadcom BCM94360CS2 |
 | Bluetooth | ORICO BT-403 |
 | Storage | 250 GB - CRUCIAL NVME CT250P2SSD8 |
 | Storage | 1 TB - WDC SATA III WD10JPVX-75JC3T0 |
 | BIOS | 447.60.3.0.0 |
-| OpenCore | 0.7.7 |
+| OpenCore | 0.8.1 |
 
 </div>
 
@@ -63,20 +63,18 @@ Figure 2. Back face of model
 - Graphics acceleration
 - NVME SSD
 - Boot chime
+- Sleep
+- AirDrop
+- Hand-off
 
 ### Not working ❌
 
-- Sleep (blackscreen after sleeping, can not wake) &rarr; finding way to fix.
-- AirDrop (AirDrop appears but can not send/receive files) &rarr; can be fixed by a legacy Mac wireless card (e.g BCM94360 for example)
 - Apple TV (can open but video is not streamed) &rarr; finding way to fix. (Update: AppleTV uses DRM, the DRM fix from WhateverGreen has been broken since macOS 10.12.3, you will need a dGPU to address this issue)
 
 ### Unchecked / tested ❓
 
 - VGA port
-- Hand-off (perhaps it's not working, but can be fixed after replacing a legacy wireless card)
 - Ethernet port
-- Serial port
-- Unlocking from Apple Watch
 
 ##  BIOS SETUP 💾
 
@@ -115,11 +113,12 @@ Figure 2. Back face of model
 
 ## SSDTs 🗂
 
-Below are two SSDTs required for my system.
+Below are three SSDTs required for my system.
 To find SSDTs for your system, please refer to [this document](https://dortania.github.io/Getting-Started-With-ACPI/ssdt-methods/ssdt-prebuilt.html).
 
 - SSDT-EC-USBX-DESKTOP.aml
 - SSDT-PLUG-DRTNIA.aml
+- SSDT-EC-USBX-DESKTOP.aml
 
 >Location: `EFI/OC/ACPI/`
 
@@ -144,10 +143,8 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen)
 - [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC)
+- [USBInjectAll.kext](https://github.com/Sniki/OS-X-USB-Inject-All/releases/tag/v0.7.6)
 - [AppleALC.kext](https://github.com/acidanthera/AppleALC)
-- [itlwm.kext](https://github.com/OpenIntelWireless/itlwm) (patching for Wi-Fi since the card is not compatible)
-- [IntelBluetoothFirmware.kext](https://github.com/OpenIntelWireless/IntelBluetoothFirmware) (patching for Wi-Fi since the card is not compatible)
-- [BlueToolFixup.kext](https://github.com/acidanthera/BrcmPatchRAM) (patching for Bluetooth since the card is not compatible)
 - [IntelMausi.kext](https://github.com/acidanthera/IntelMausi)
 
 >Notice: `itlwm.kext` and `IntelBluetoothFirmware.kext` must be on the same version.
@@ -159,11 +156,10 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 - [CPUFriend.kext](https://github.com/stevezhengshiqi/one-key-cpufriend) (CPU power management, please ignore if you are not certain about this one) 
 - CPUFriendDataProvider.kext (same as `CPUFriend.kext`)
 - [NVMeFix.kext](https://github.com/acidanthera/NVMeFix) (for fixing power and energy consumption on NVME SSD, only use if you are having a NVME SSD)
-- USBMap.kext (remove this kext and also in the OpenCore entry if you are not on the same HP model, only use when one of your USB ports are not working, detailed  will be provided in `USB PORTS MAPPING` section)
 
 >Location: `EFI/OC/Kexts/`
 
-## USB PORTS MAPPING ⌗
+## USB PORTS MAPPING ⌗ (deprecated &rarr; switched to Hackintool mapping)
 
 This section aims to introduce you on how to make a `USBMap.kext` to properly make all of your USB ports working.   
 If all of your USB ports are working as normal, please ignore this part and remove the `USBMap.kext` out of the `EFI/OC/Kexts/` folder and also in the entry of OpenCore (`config.plist` file).     
