@@ -42,7 +42,7 @@ Figure 2. Back face of model
 | Graphics | Intel HD Graphics 630 |
 | Monitor | LG 29WN600 |
 | Wi-Fi | Broadcom BCM94360CS2 |
-| Bluetooth | ORICO BT-403 |
+| Bluetooth | Broadcom BCM94360CS2 |
 | Storage | 250 GB - CRUCIAL NVME CT250P2SSD8 |
 | Storage | 1 TB - WDC SATA III WD10JPVX-75JC3T0 |
 | BIOS | 447.60.3.0.0 |
@@ -63,13 +63,13 @@ Figure 2. Back face of model
 - Graphics acceleration
 - NVME SSD
 - Boot chime
-- Sleep
 - AirDrop
 - Hand-off
 
 ### Not working ❌
 
 - Apple TV (can open but video is not streamed) &rarr; finding way to fix. (Update: AppleTV uses DRM, the DRM fix from WhateverGreen has been broken since macOS 10.12.3, you will need a dGPU to address this issue)
+- Sleep (sometimes it works)
 
 ### Unchecked / tested ❓
 
@@ -118,7 +118,6 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 
 - SSDT-EC-USBX-DESKTOP.aml
 - SSDT-PLUG-DRTNIA.aml
-- SSDT-EC-USBX-DESKTOP.aml
 
 >Location: `EFI/OC/ACPI/`
 
@@ -143,11 +142,9 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen)
 - [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC)
-- [USBInjectAll.kext](https://github.com/Sniki/OS-X-USB-Inject-All/releases/tag/v0.7.6)
 - [AppleALC.kext](https://github.com/acidanthera/AppleALC)
 - [IntelMausi.kext](https://github.com/acidanthera/IntelMausi)
-
->Notice: `itlwm.kext` and `IntelBluetoothFirmware.kext` must be on the same version.
+- [USBPorts.kext](Created using Hackintool)
 
 **Optional**
 
@@ -159,64 +156,10 @@ To find SSDTs for your system, please refer to [this document](https://dortania.
 
 >Location: `EFI/OC/Kexts/`
 
-## USB PORTS MAPPING ⌗ (deprecated &rarr; switched to Hackintool mapping)
+## USB PORTS MAPPING ⌗ (deprecated &rarr; switched to Hackintool mapping method)
+The USBPorts.kext file in the EFI folder was created using [Hackintool](https://github.com/headkaze/Hackintool). The kext file is used to recognize all the ports of my machine.
+If you are having a different model, you can refer to the video [here](https://www.youtube.com/watch?v=TBbD4pGFhIU&ab_channel=TechLabs) for making one. Thanks to Tech Labs.
 
-This section aims to introduce you on how to make a `USBMap.kext` to properly make all of your USB ports working.   
-If all of your USB ports are working as normal, please ignore this part and remove the `USBMap.kext` out of the `EFI/OC/Kexts/` folder and also in the entry of OpenCore (`config.plist` file).     
-Without this `USBMap.kext`, all of my USB ports will work except for one port `BACK_L2` as in Figure 2. Therefore, I need to make the kext file and make this port works.
-
-- What you need?
-    - Basic knowledge on USB types (which you can read from [here](https://dortania.github.io/OpenCore-Post-Install/usb/#macos-and-the-15-port-limit))
-    - USBMap utility, which can be found [here](https://github.com/corpnewt/USBMap)
-    - A USB 2.0 device
-    - A USB 3.0 device
-    - A USB C device
-
-### Step 1: Discover USB 2.0 ports
-
-Entering the ports discovery by openning `USBMap.command` &rarr; press `D` then `Enter`.    
-You will be plugging your USB 2.0 device into each port of your PC, each time you plug in, make sure you wait until the program to recognize the USB device and its port.  
-You will be asked for renaming the port when a new USB device is recognized by the program, press `N` and name a port for whatever name you want. For easy mapping, I would suggest to name the port based on its position (you can refer to Figure 1 and Figure 2 for port positions)
-
-### Step 2: Discover USB 3.0 ports
-
-Replicate `Step 1`, but in this step you will be using a USB 3.0 device.    
-Again, put a name that refers to the port positions, you can enter the same name as in `Step 1`, just make sure the position name is correct.
-
-### Step 3: Discover USB C device
-
-Replicate `Step 1`, and this step will require you to plug in USB C device.     
-Place USB C based on the position again. As I have only one USB C port, so I will name all the USB C ports found by `TYPE_C`.
->Notice: A USB C device in my case will requrie three ports (one will be recogized as USB 2.0 device and two will be USB 3.0 device, they are port 6, 14, 15 as from Figure 3)
-
-<div align="center">
-<img align="center" src="Assets/usb-mapping-discover.png" height="650" alt="model">
-<div align="center">
-Figure 3. USB ports after mapping
-</div>
-</div>
-
-### Step 4: Define USB ports
-
-After completing all the steps above, you will be required to define the type of all discovered ports.      
-From the current screen in Figure 3, press `Q` and then `P` &rarr; `Enter` to the build kext step.    
-You can also enable a port in the list by entering: `port:On`, replace the `port` with the port number shown in the screen which you found it's being disabled from the screen as in Figure 4.     
-From my specific model, since all the ports were USB 3.0 type so I can easily define them by entering e.g: `T:1,2,3,4,5:3` and `Enter` (replace `1,2,3,4,5` by actual port you found on the screen, with USB 2.0 you will need to change `:3` at the end by `:0`).  
-There are three USB C ports so I can define them by `T:6,14,15:10`.
-
-<div align="center">
-<img align="center" src="Assets/usb-mapping-define.png" height="850" alt="model">
-<div align="center">
-Figure 4. USB ports after fully defined
-</div>
-</div>
-
-### Step 5: Build & apply
-
-At this step, after fully defining all the ports, press `K` and `Enter` to build `USBMap.kext` (for Catalina and newer OS) or `USBMapLegacy.kext` (for Mojave and older OS).
-Copy `USBMap.kext` or `USBMapLegacy.kext` into `EFI/OC/Kexts/`, edit `config.plist` by adding new entry that point to this kext.    
-
-Reboot, and all my ports work. ✅
 
 ## SPECIFIC CONFIGURATIONS
 
